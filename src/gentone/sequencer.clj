@@ -1,8 +1,9 @@
 (ns gentone.sequencer
-  (:require [fungp.core    :refer :all])
-  (:require [gentone.math  :refer :all])
-  (:require [gentone.pitch :refer :all])
-  (:require [gentone.time  :refer :all]))
+  (:require [fungp.core    :refer :all]
+            [gentone.util  :refer :all]
+            [gentone.math  :refer :all]
+            [gentone.pitch :refer :all]
+            [gentone.time  :refer :all]))
 
 (def default-note {:time  0
                    :pitch 0
@@ -84,8 +85,8 @@
   (fn [tree]
     (let [s (eval-tree tree)
           p (pitches s)
-          d (durations s)]
-      (- 16 (count (flatten tree))))))
+          t (times s)]
+      (- -1 (count (flatten tree))))))
 
 (defn printer
   [tree fitness]

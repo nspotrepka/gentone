@@ -2,13 +2,24 @@
   (:require [clojure.test :refer :all]
             [gentone.math :refer :all]))
 
-(deftest rotate-left-test
-  (testing "rotate-left"
-    (is (= [] (rotate-left [])))
-    (is (= [2 3 4 1] (rotate-left [1 2 3 4])))
-    (is (= [8 7 6 9] (rotate-left [9 8 7 6])))
-    (is (= [2 3 4 5 0 1] (rotate-left 2 [0 1 2 3 4 5])))
-    (is (= [5 0 1 2 3 4] (rotate-left 5 [0 1 2 3 4 5])))))
+(deftest half-test
+  (testing "half"
+    (is (= 0 (half 0)))
+    (is (= 1/2 (half 1)))
+    (is (= 1 (half 2)))))
+
+(deftest soft-long-test
+  (testing "soft-long"
+    (is (= 0 (soft-long 0)))
+    (is (= 1 (soft-long 1.0)))
+    (is (= 1.1 (soft-long 1.1)))))
+
+(deftest pow-test
+  (testing "pow"
+    (is (= 0 (pow 0 1)))
+    (is (= 1 (pow 1 0)))
+    (is (= 2 (pow 2 1)))
+    (is (= 1.5 (pow 2.25 1/2)))))
 
 (deftest differences-test
   (testing "differences"

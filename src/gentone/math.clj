@@ -1,12 +1,17 @@
-(ns gentone.math)
+(ns gentone.math
+  (:require [gentone.util :refer :all]))
 
 (defn half
   [x]
   (/ x 2))
 
-(defn rotate-left
-  ([v] (rotate-left 1 v))
-  ([n v] (concat (drop n v) (take n v))))
+(defn soft-long
+  [x]
+  (if (== (long x) x) (long x) x))
+
+(defn pow
+  [a x]
+  (soft-long (Math/pow a x)))
 
 (defn differences
   [v]

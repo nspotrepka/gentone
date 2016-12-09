@@ -1,19 +1,16 @@
 (ns gentone.pitch
-  (:require [gentone.math :refer :all]))
+  (:require [gentone.util :refer :all]
+            [gentone.math :refer :all]))
 
 (defn pitches
   [s]
   (map :pitch s))
 
-(defn rests
-  [s]
-  (map :rest s))
-
 (defn pitches-r
   [s]
-  (let [last-pitch (->> s (reverse) (drop-while :rest) (first) (:pitch))]
-    (rotate-left
-      (reductions
-        #(if (:rest %2) %1 (:pitch %2))
-        last-pitch
-        (drop-last 1 s)))))
+  (let [rests (map :rest s)]
+    (filter-rests (pitches s) rests)))
+
+(defn pitch-freq
+  [f v]
+  (map #(soft-long (* f (Math/pow 2 (/ % 12)))) v))

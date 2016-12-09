@@ -1,10 +1,16 @@
 (ns gentone.time
-  (:require [gentone.math :refer :all]))
+  (:require [gentone.util :refer :all]
+            [gentone.math :refer :all]))
 
 (defn times
   [s]
   (map :time s))
 
-(defn durations
+(defn times-r
   [s]
-  (map #(mod % 1) (differences (times s))))
+  (let [rests (map :rest s)]
+    (filter-rests (times s) rests)))
+
+(defn time-duration
+  [v]
+  (map #(mod % 1) (differences v)))

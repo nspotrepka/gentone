@@ -1,7 +1,7 @@
 (ns gentone.pitch_test
   (:require [clojure.test      :refer :all]
-            [gentone.sequencer :refer :all]
-            [gentone.pitch     :refer :all]))
+            [gentone.pitch     :refer :all]
+            [gentone.sequencer :refer :all]))
 
 (def tt [0 1/4 1/2 3/4])
 (def pp [0 2 7 5])
@@ -19,14 +19,13 @@
     (is (= pp (pitches some-seq)))
     (is (= pp (pitches none-seq)))))
 
-(deftest rests-test
-  (testing "rests"
-    (is (= no-rests (rests full-seq)))
-    (is (= some-rests (rests some-seq)))
-    (is (= all-rests (rests none-seq)))))
-
 (deftest pitches-r-test
   (testing "pitches-r"
     (is (= pp (pitches-r full-seq)))
-    (is (= [7 2 7 7] (pitches-r some-seq)))
-    (is (= [nil nil nil nil] (pitches-r none-seq)))))
+    (is (= [2 7 5] (pitches-r some-seq)))
+    (is (= [] (pitches-r none-seq)))))
+
+(deftest pitch-freq-test
+  (testing "pitch-freq"
+    (is (= [100 200 50 100] (pitch-freq 100 [0 12 -12 0])))
+    (is (= [1 1 1 (Math/pow 2 1/12)] (pitch-freq 1 [0 0 0 1])))))

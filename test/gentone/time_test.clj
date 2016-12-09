@@ -1,24 +1,34 @@
 (ns gentone.time_test
   (:require [clojure.test      :refer :all]
-            [gentone.sequencer :refer :all]
-            [gentone.time      :refer :all]))
+            [gentone.time      :refer :all]
+            [gentone.sequencer :refer :all]))
 
 (def tt0 [0 1/4 1/2 3/4])
 (def tt1 [0 1/2 3/4 7/8])
 (def tt2 [1/8 3/8 1/2 5/6])
+(def pp [0 0 0 0])
+(def no-rests [false false false false])
+(def some-rests [true false false true])
+(def all-rests [true true true true])
 
-(def seq0 (make-sequence tt0 (repeat 4 0)))
-(def seq1 (make-sequence tt1 (repeat 4 0)))
-(def seq2 (make-sequence tt2 (repeat 4 0)))
+(def full-seq (make-sequence tt0 pp no-rests))
+(def some-seq (make-sequence tt1 pp some-rests))
+(def none-seq (make-sequence tt2 pp all-rests))
 
 (deftest times-test
   (testing "times"
-    (is (= tt0 (times seq0)))
-    (is (= tt1 (times seq1)))
-    (is (= tt2 (times seq2)))))
+    (is (= tt0 (times full-seq)))
+    (is (= tt1 (times some-seq)))
+    (is (= tt2 (times none-seq)))))
 
-(deftest durations-test
-  (testing "durations"
-    (is (= [1/4 1/4 1/4 1/4] (durations seq0)))
-    (is (= [1/2 1/4 1/8 1/8] (durations seq1)))
-    (is (= [1/4 1/8 1/3 7/24] (durations seq2)))))
+(deftest times-r-test
+  (testing "times-r"
+    (is (= tt0 (times-r full-seq)))
+    (is (= [1/2 3/4 7/8] (times-r some-seq)))
+    (is (= [] (times-r none-seq)))))
+
+(deftest time-duration-test
+  (testing "time-duration"
+    (is (= [1/4 1/4 1/4 1/4] (time-duration tt0)))
+    (is (= [1/2 1/4 1/8 1/8] (time-duration tt1)))
+    (is (= [1/4 1/8 1/3 7/24] (time-duration tt2)))))
