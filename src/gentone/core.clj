@@ -1,6 +1,7 @@
-(ns gentone.core)
+(ns gentone.core
+  (:require [gentone.sequencer :refer :all]))
 
 (defn foo
-  "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+  "An example function."
+  []
+  (generate-sequence 2 2))
