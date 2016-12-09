@@ -1,6 +1,7 @@
 # gentone
 
-Gentone is a music composition library for generating melodic loops through genetic programming.
+Gentone is a music composition library for generating melodic sequences using
+genetic programming.
 
 ## License
 
