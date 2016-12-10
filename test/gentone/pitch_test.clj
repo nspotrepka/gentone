@@ -22,7 +22,7 @@
 (deftest pitches-r-test
   (testing "pitches-r"
     (is (= pp (pitches-r full-seq)))
-    (is (= [2 7 5] (pitches-r some-seq)))
+    (is (= [2 7 7] (pitches-r some-seq)))
     (is (= [] (pitches-r none-seq)))))
 
 (deftest pitch-freq-test

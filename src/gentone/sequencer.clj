@@ -21,6 +21,28 @@
      pp
      rr)))
 
+(defn clean-sequence
+  [s]
+  (let [s2 (filter-rests-echo s (map :rest s))
+        s3 (concat (drop-while :rest s2) (take-while :rest s2))
+        f  (first s3)
+        t  (:time f)
+        p  (:pitch f)]
+    (map
+      (fn [m]
+        (-> m
+          (update :time #(mod (- % t) 1))
+          (update :pitch #(- % p))))
+      s3)))
+
+(defn split-sequence
+  [s]
+  (let [s2 (clean-sequence s)
+        tt (times-r s2)
+        pp (pitches-r s2)
+        rr (rests-r s2)]
+    [tt pp rr]))
+
 (defn pitch-down
   [v]
   (map #(update % :pitch dec) v))
@@ -78,24 +100,30 @@
         f (eval l)]
     (loop-sequence (f))))
 
-;; EDIT THIS FITNESS FUNCTION
+;; WORKSPACE BEGIN
 
 (defn make-fitness
+  "Toying around with fitness."
   []
   (fn [tree]
     (let [s (eval-tree tree)
-          p (pitches s)
-          t (times s)]
-      (- -1 (count (flatten tree))))))
+          p (pitches-r s)
+          t (times-r s)]
+      (-
+        (if (= t (distinct t)) -1 10000)
+        (reduce #(+ %1 (Math/abs %2)) 0 (differences p))))))
 
 (defn printer
   [tree fitness]
   (let [s (eval-tree tree)]
-    (println tree)
-    (println (pitches s))
-    (println (times s))
-    (println (str "Error: " fitness "\n"))
+    (println "hash\t" (reduce #(+ %1 (int %2)) 0 (str s)))
+    (println "times\t" (times s))
+    (println "pitches\t" (pitches s))
+    (println "rests\t" (map :rest s))
+    (println "error\t" fitness "\n")
     (flush)))
+
+;; WORKSPACE END
 
 (defn generate-sequence
   [iterations migrations]
@@ -115,4 +143,5 @@
                  :adf-count 0
                  :adf-arity 1}
         [tree score] (rest (run-genetic-programming options))]
-    tree))
+    (println "score\t" score "\n")
+    (eval-tree tree)))

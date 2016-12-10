@@ -8,8 +8,11 @@
 
 (defn pitches-r
   [s]
-  (let [rests (map :rest s)]
-    (filter-rests (pitches s) rests)))
+  (let [pp    (pitches s)
+        rests (map :rest s)
+        pp2   (filter-rests-echo pp rests)
+        pp2r  (rotate-right pp2)]
+    (switch-rests pp2 pp2r (rests-r s))))
 
 (defn pitch-freq
   [f v]

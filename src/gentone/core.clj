@@ -1,7 +1,8 @@
 (ns gentone.core
-  (:require [gentone.sequencer :refer :all]))
+  (:require [gentone.sequencer :refer :all]
+            [gentone.sound     :refer :all]))
 
 (defn foo
   "An example function."
-  []
-  (generate-sequence 2 2))
+  [dur freq i m]
+  (play-sequence dur freq (generate-sequence i m)))

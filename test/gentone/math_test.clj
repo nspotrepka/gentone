@@ -21,6 +21,12 @@
     (is (= 2 (pow 2 1)))
     (is (= 1.5 (pow 2.25 1/2)))))
 
+(deftest log-test
+  (testing "log"
+    (is (= 0.0 (log 1)))
+    (is (= 1.0 (log Math/E)))
+    (is (= 2.0 (log (* Math/E Math/E))))))
+
 (deftest differences-test
   (testing "differences"
     (is (= [] (differences [])))
@@ -44,3 +50,14 @@
     (is (= [] (products [])))
     (is (= [1 1/2 1 4] (products [1/2 2 4 1/4])))
     (is (= [5 4 8 1] (products 5 [4/5 2 1/8 5])))))
+
+(deftest gaussian-info-test
+  (testing "gaussian-info"
+    (is
+      (=
+        (+ 0.5 (log (* 2 Math/PI)))
+        (gaussian-info 1 [0 1])))
+    (is
+      (=
+        (+ 0.5 (log (* 2 Math/PI)) (* 2 (log 2)))
+        (gaussian-info 2 [0 2])))))

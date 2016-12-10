@@ -8,9 +8,10 @@
 
 (defn times-r
   [s]
-  (let [rests (map :rest s)]
-    (filter-rests (times s) rests)))
+  (let [tt    (times s)
+        rests (map :rest s)]
+    (filter-rests-echo tt rests)))
 
 (defn time-duration
   [v]
-  (map #(mod % 1) (differences v)))
+  (map #(if (> % 1) 1 (mod % 1)) (differences v)))

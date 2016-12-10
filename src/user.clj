@@ -9,4 +9,5 @@
             [gentone.math :refer :all]
             [gentone.pitch :refer :all]
             [gentone.time :refer :all]
-            [gentone.sequencer :refer :all]))
+            [gentone.sequencer :refer :all]
+            [gentone.sound :refer :all]))

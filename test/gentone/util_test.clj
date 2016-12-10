@@ -40,10 +40,24 @@
 
 (deftest filter-rests-test
   (testing "filter-rests"
-    (is (= [0 1 2] (filter-rests [0 1 2 3] rr0)))
-    (is (= [0 1 2 3] (filter-rests [0 1 2 3] rr1)))
-    (is (= [1 2 3] (filter-rests [0 1 2 3] rr2)))
-    (is (= [0 2 3] (filter-rests [0 1 2 3] rr3)))))
+    (is (= [0 1] (filter-rests [0 1 2 3] rr0)))
+    (is (= [0 2] (filter-rests [0 1 2 3] rr1)))
+    (is (= [1 2] (filter-rests [0 1 2 3] rr2)))
+    (is (= [2 3] (filter-rests [0 1 2 3] rr3)))))
+
+(deftest filter-rests-echo-test
+  (testing "filter-rests-echo"
+    (is (= [0 1 2] (filter-rests-echo [0 1 2 3] rr0)))
+    (is (= [0 1 2 3] (filter-rests-echo [0 1 2 3] rr1)))
+    (is (= [1 2 3] (filter-rests-echo [0 1 2 3] rr2)))
+    (is (= [0 2 3] (filter-rests-echo [0 1 2 3] rr3)))))
+
+(deftest switch-rests-test
+  (testing "switch-rests"
+    (is (= [0 1 8 9] (switch-rests [0 1 2 3] [6 7 8 9] rr0)))
+    (is (= [0 7 2 9] (switch-rests [0 1 2 3] [6 7 8 9] rr1)))
+    (is (= [6 1 2 9] (switch-rests [0 1 2 3] [6 7 8 9] rr2)))
+    (is (= [6 7 2 3] (switch-rests [0 1 2 3] [6 7 8 9] rr3)))))
 
 (deftest rests-r-test
   (testing "rests-r"
