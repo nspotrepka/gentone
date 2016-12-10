@@ -14,4 +14,5 @@
 
 (defn time-duration
   [v]
-  (map #(if (> % 1) 1 (mod % 1)) (differences v)))
+  (let [dd (differences v)]
+    (concat (drop-last 1 dd) (map inc (take-last 1 dd)))))

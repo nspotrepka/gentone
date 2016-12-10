@@ -14,6 +14,13 @@
     (is (= 1 (soft-long 1.0)))
     (is (= 1.1 (soft-long 1.1)))))
 
+(deftest dist-test
+  (testing "dist"
+    (is (= 1.0 (dist 0 1)))
+    (is (= 1.0 (dist 1 0)))
+    (is (= 2.2 (dist -1.1 1.1)))
+    (is (= 3.0 (dist 1.5 -1.5)))))
+
 (deftest pow-test
   (testing "pow"
     (is (= 0 (pow 0 1)))
@@ -21,11 +28,25 @@
     (is (= 2 (pow 2 1)))
     (is (= 1.5 (pow 2.25 1/2)))))
 
+(deftest exp-test
+  (testing "exp"
+    (is (= 1 (exp 0)))
+    (is (= Math/E (exp 1)))
+    (is (= (* Math/E Math/E) (exp 2)))
+    (is (= (/ 1 Math/E) (exp -1)))))
+
 (deftest log-test
   (testing "log"
     (is (= 0.0 (log 1)))
     (is (= 1.0 (log Math/E)))
     (is (= 2.0 (log (* Math/E Math/E))))))
+
+(deftest log2-test
+  (testing "log2"
+    (is (= 0 (log2 1)))
+    (is (= 1 (log2 2)))
+    (is (= -1 (log2 1/2)))
+    (is (= (/ 1 (log 2)) (log2 Math/E)))))
 
 (deftest differences-test
   (testing "differences"
@@ -51,13 +72,41 @@
     (is (= [1 1/2 1 4] (products [1/2 2 4 1/4])))
     (is (= [5 4 8 1] (products 5 [4/5 2 1/8 5])))))
 
-(deftest gaussian-info-test
-  (testing "gaussian-info"
-    (is
-      (=
-        (+ 0.5 (log (* 2 Math/PI)))
-        (gaussian-info 1 [0 1])))
-    (is
-      (=
-        (+ 0.5 (log (* 2 Math/PI)) (* 2 (log 2)))
-        (gaussian-info 2 [0 2])))))
+(deftest entropy-from-probabilities-test
+  (testing "entropy-from-probabilities"
+    (is (= 0.0 (entropy-from-probabilities [1])))
+    (is (= 1.0 (entropy-from-probabilities [1/2 1/2])))
+    (is (= 1.5 (entropy-from-probabilities [1/4 1/4 1/2])))
+    (is (= 1.75 (entropy-from-probabilities [1/8 1/8 1/4 1/2])))))
+
+(deftest entropy-test
+  (testing "entropy"
+    (is (= 0.0 (entropy [0 0 0 0])))
+    (is (= 1.0 (entropy [0 1 0 1])))
+    (is (= 1.5 (entropy [0 1 2 2])))
+    (is (= 1.75 (entropy [0 0 1 0 0 1 2 3])))))
+
+(deftest gaussian-test
+  (testing "gaussian"
+    (is (= 1 (gaussian 1 0)))
+    (is (= (exp -2) (gaussian 1 2)))
+    (is (= (exp -1/2) (gaussian 2 2)))))
+
+(deftest gaussian-scaled-entropy-test
+  (testing "gaussian-scaled-entropy"
+    (is (= 0.0 (gaussian-scaled-entropy 1 [0 0 0 0])))
+    (let [s  (+ 1 (exp -1/2))
+          p0 (/ 1 s)
+          p1 (/ (exp -1/2) s)]
+      (is
+        (=
+          (entropy-from-probabilities [p0 p1])
+          (gaussian-scaled-entropy 1 [0 1 0 1]))))
+    (let [s  (+ 1 (exp -1/2) (* 2 (exp -2)))
+          p0 (/ 1 s)
+          p1 (/ (exp -1/2) s)
+          p2 (/ (* 2 (exp -2)) s)]
+      (is
+        (=
+          (entropy-from-probabilities [p0 p1 p2])
+          (gaussian-scaled-entropy 1 [0 1 2 2]))))))

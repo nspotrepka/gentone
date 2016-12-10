@@ -44,6 +44,3 @@
                  (concat rr rr))]
       (when-not (empty? evts)
         (apply add-audio-events evts)))))
-
-;; TODO: Move this to initialization function
-(start-engine)

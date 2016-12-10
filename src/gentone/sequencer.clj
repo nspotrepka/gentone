@@ -51,6 +51,14 @@
   [v]
   (map #(update % :pitch inc) v))
 
+(defn pitch-down-down
+  [v]
+  (map #(update % :pitch (comp dec dec)) v))
+
+(defn pitch-up-up
+  [v]
+  (map #(update % :pitch (comp inc inc)) v))
+
 (defn toggle-rest
   [v]
   (map #(update % :rest not) v))
@@ -63,9 +71,13 @@
   [v]
   (map #(update % :time (comp half inc)) v))
 
-(defn half-length
+(defn double-left
   [v]
-  (map #(update % :time half) v))
+  (map #(update % :time (comp dec (partial * 2))) v))
+
+(defn double-right
+  [v]
+  (map #(update % :time (comp inc (partial * 2))) v))
 
 (defn combine
   [v0 v1]
@@ -79,13 +91,15 @@
         (recur x yr (conj r yf))))))
 
 (def functions
-  `[[pitch-down  1]
-    [pitch-up    1]
-    [toggle-rest 1]
-    [half-left   1]
-    [half-right  1]
-    [half-length 1]
-    [combine     2]])
+  `[[pitch-down   1]
+    [pitch-up     1]
+    [toggle-rest  1]
+    [half-left    1]
+    [half-right   1]
+    [double-left  1]
+    [double-right 1]
+    [combine      2]
+    [combine      2]])
 
 (defn loop-sequence
   [v]
@@ -106,12 +120,22 @@
   "Toying around with fitness."
   []
   (fn [tree]
-    (let [s (eval-tree tree)
-          p (pitches-r s)
-          t (times-r s)]
-      (-
-        (if (= t (distinct t)) -1 10000)
-        (reduce #(+ %1 (Math/abs %2)) 0 (differences p))))))
+    (let [s          (eval-tree tree)
+          [tt pp rr] (split-sequence s)]
+      (if (not= tt (distinct tt))
+        1000000
+        (let [dd         (map log2 (time-duration tt))
+              p-delta    (differences pp)
+              d-delta    (differences dd)
+              p-delta2   (differences p-delta)
+              d-delta2   (differences d-delta)
+              pp-e       (entropy pp)
+              dd-e       (entropy dd)
+              rr-e       (entropy rr)]
+          (+
+            -1
+            (- pp-e)
+            (- dd-e)))))))
 
 (defn printer
   [tree fitness]
@@ -134,12 +158,12 @@
                  :report printer
                  :iterations iterations
                  :migrations migrations
-                 :num-islands 4
-                 :population-size 18
-                 :tournament-size 4
-                 :mutation-probability 0.1667
-                 :max-depth 9
-                 :mutation-depth 5
+                 :num-islands 6
+                 :population-size 12
+                 :tournament-size 5
+                 :mutation-probability 0.333
+                 :max-depth 18
+                 :mutation-depth 9
                  :adf-count 0
                  :adf-arity 1}
         [tree score] (rest (run-genetic-programming options))]
