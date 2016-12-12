@@ -6,6 +6,7 @@
             [gentone.time  :refer :all]))
 
 (def default-note {:time  0
+                   :step  1
                    :pitch 0
                    :rest  false})
 
@@ -23,7 +24,8 @@
 
 (defn clean-sequence
   [s]
-  (let [s2 (filter-rests-echo s (map :rest s))
+  (let [s1 (sort-by :time s)
+        s2 (filter-rests-echo s1 (map :rest s1))
         s3 (concat (drop-while :rest s2) (take-while :rest s2))
         f  (first s3)
         t  (:time f)
@@ -31,16 +33,16 @@
     (map
       (fn [m]
         (-> m
+          (dissoc :step)
           (update :time #(mod (- % t) 1))
           (update :pitch #(- % p))))
       s3)))
 
 (defn split-sequence
   [s]
-  (let [s2 (clean-sequence s)
-        tt (times-r s2)
-        pp (pitches-r s2)
-        rr (rests-r s2)]
+  (let [tt (times-r s)
+        pp (pitches-r s)
+        rr (rests-r s)]
     [tt pp rr]))
 
 (defn pitch-down
@@ -65,82 +67,98 @@
 
 (defn half-left
   [v]
-  (map #(update % :time (comp half dec)) v))
+  (map #(let [h (half (:step %))]
+         (-> %
+           (update :step (constantly h))
+           (update :time (fn [x] (- x h)))))
+    v))
 
 (defn half-right
   [v]
-  (map #(update % :time (comp half inc)) v))
+  (map #(let [h (half (:step %))]
+         (-> %
+           (update :step (constantly h))
+           (update :time (fn [x] (+ x h)))))
+    v))
 
 (defn double-left
   [v]
-  (map #(update % :time (comp dec (partial * 2))) v))
+  (map #(let [s (:step %)]
+         (-> %
+           (update :step (fn [x] (* 2 x)))
+           (update :time (fn [x] (- x s)))))
+    v))
 
 (defn double-right
   [v]
-  (map #(update % :time (comp inc (partial * 2))) v))
+  (map #(let [s (:step %)]
+         (-> %
+           (update :step (fn [x] (* 2 x)))
+           (update :time (fn [x] (+ x s)))))
+    v))
 
-(defn combine
-  [v0 v1]
-  (loop [[xf & xr :as x] (if (nil? v0) '() v0)
-         [yf & yr :as y] (if (nil? v1) '() v1)
-         r []]
-    (if (or (empty? x) (empty? y))
-      (concat r x y)
-      (if (<= (:time xf) (:time yf))
-        (recur xr y (conj r xf))
-        (recur x yr (conj r yf))))))
-
-(def functions
-  `[[pitch-down   1]
-    [pitch-up     1]
-    [toggle-rest  1]
-    [half-left    1]
-    [half-right   1]
-    [double-left  1]
-    [double-right 1]
-    [combine      2]
-    [combine      2]])
+(defn make-functions
+  [n-concat]
+  (into
+    [[`pitch-down      1]
+     [`pitch-up        1]
+     [`pitch-down-down 1]
+     [`pitch-up-up     1]
+     [`toggle-rest     1]
+     [`half-left       1]
+     [`half-right      1]
+     [`double-left     1]
+     [`double-right    1]]
+    (repeat n-concat [concat 2])))
 
 (defn loop-sequence
   [v]
-  (let [neg (take-while (comp neg? :time) v)
-        pos (drop-while (comp neg? :time) v)
-        mod (map #(update % :time inc) neg)]
-    (combine pos mod)))
+  (map #(update % :time (fn [x] (mod x 1))) v))
 
 (defn eval-tree
   [tree]
   (let [l (list 'fn '[] tree)
         f (eval l)]
-    (loop-sequence (f))))
+    (clean-sequence (loop-sequence (f)))))
 
 ;; WORKSPACE BEGIN
 
 (defn make-fitness
   "Toying around with fitness."
-  []
+  [c r p p1 p2 d d1 d2 sp1 sp2 sd1 sd2]
   (fn [tree]
     (let [s          (eval-tree tree)
           [tt pp rr] (split-sequence s)]
       (if (not= tt (distinct tt))
         1000000
-        (let [dd         (map log2 (time-duration tt))
-              p-delta    (differences pp)
+        (let [pp2        (filter-rests pp rr)
+              dd         (map log2 (time-duration tt))
+              p-delta    (differences pp2)
               d-delta    (differences dd)
               p-delta2   (differences p-delta)
               d-delta2   (differences d-delta)
-              pp-e       (entropy pp)
+              pp-e       (entropy pp2)
               dd-e       (entropy dd)
-              rr-e       (entropy rr)]
+              rr-e       (entropy rr)
+              p-delta-e  (gaussian-entropy sp1 p-delta)
+              p-delta2-e (gaussian-entropy sp2 p-delta2)
+              d-delta-e  (gaussian-entropy sd1 d-delta)
+              d-delta2-e (gaussian-entropy sd2 d-delta2)]
           (+
-            -1
-            (- pp-e)
-            (- dd-e)))))))
+            (dist2 c (count tt))
+            (dist2 r (count (filter identity rr)))
+            (dist2 (log2 p) pp-e)
+            (* 1/2 (dist2 p1 p-delta-e))
+            (* 1/4 (dist2 p2 p-delta2-e))
+            (dist2 (log2 d) dd-e)
+            (* 1/2 (dist2 d1 d-delta-e))
+            (* 1/4 (dist2 d2 d-delta2-e))
+            ))))))
 
 (defn printer
   [tree fitness]
   (let [s (eval-tree tree)]
-    (println "hash\t" (reduce #(+ %1 (int %2)) 0 (str s)))
+    (println "id\t" (reduce #(+ %1 (int %2)) 0 (str s)))
     (println "times\t" (times s))
     (println "pitches\t" (pitches s))
     (println "rests\t" (map :rest s))
@@ -150,22 +168,25 @@
 ;; WORKSPACE END
 
 (defn generate-sequence
-  [iterations migrations]
-  (let [fitness (make-fitness)
-        options {:terminals terminals
-                 :functions functions
-                 :fitness fitness
-                 :report printer
-                 :iterations iterations
-                 :migrations migrations
-                 :num-islands 6
-                 :population-size 12
-                 :tournament-size 5
-                 :mutation-probability 0.333
-                 :max-depth 18
-                 :mutation-depth 9
-                 :adf-count 0
-                 :adf-arity 1}
-        [tree score] (rest (run-genetic-programming options))]
+  [root-size iterations migrations c r p p1 p2 d d1 d2 sp1 sp2 sd1 sd2]
+  (let [functions    (make-functions 3)
+        fitness      (make-fitness c r p p1 p2 d d1 d2 sp1 sp2 sd1 sd2)
+        options      {:terminals terminals
+                      :functions functions
+                      :fitness fitness
+                      :report printer
+                      :iterations iterations
+                      :migrations migrations
+                      :num-islands root-size
+                      :population-size root-size
+                      :tournament-size (int (+ 1 (log2 root-size)))
+                      :mutation-probability 0.777
+                      :max-depth 16
+                      :mutation-depth 16
+                      :adf-count 0
+                      :adf-arity 1}
+        gp           (run-genetic-programming options)
+        collection   (first gp)
+        [tree score] (rest gp)]
     (println "score\t" score "\n")
     (eval-tree tree)))

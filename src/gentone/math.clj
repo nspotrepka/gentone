@@ -13,6 +13,11 @@
   [x y]
   (double (Math/abs (- y x))))
 
+(defn dist2
+  [x y]
+  (let [d (dist x y)]
+    (* d d)))
+
 (defn pow
   [a x]
   (soft-long (Math/pow a x)))
@@ -30,6 +35,13 @@
 (defn log2
   [x]
   (soft-long (/ (log x) log-of-2)))
+
+(defn normalize
+  [v]
+  (let [s (reduce + v)]
+    (if (== 0.0 s)
+      v
+      (map #(/ % s) v))))
 
 (defn differences
   [v]
@@ -49,25 +61,35 @@
   ([v] (products 1 v))
   ([x v] (drop-last 1 (reductions * x v))))
 
-(defn entropy-from-probabilities
+(defn entropy-from-distribution
   [p]
   (double (- (reduce + (map #(* % (log2 %)) p)))))
+
+(defn entropy-from-probabilities
+  [p]
+  (let [c (count p)]
+    (if (= c 0)
+      0.0
+      (double (/ (- (reduce + (map log2 p))) c)))))
 
 (defn entropy
   [v]
   (let [c  (count v)
         f  (frequencies v)
         p  (map #(/ % c) (vals f))]
-    (entropy-from-probabilities p)))
+    (entropy-from-distribution p)))
 
 (defn gaussian
   [sigma x]
   (exp (/ (* x x) (* -2 sigma sigma))))
 
-(defn gaussian-scaled-entropy
+(defn gaussian-entropy
   [sigma v]
-  (let [f  (frequencies v)
-        p  (map #(* (get f %) (gaussian sigma %)) (keys f))
-        s  (reduce + p)
-        p2 (map #(/ % s) p)]
-    (entropy-from-probabilities p2)))
+  (let [f (frequencies v)
+        a (map #(* (get f %) (gaussian sigma %)) (keys f))
+        p (normalize a)]
+    (entropy-from-distribution p)))
+
+(defn distribution-entropy
+  [f v]
+  (entropy-from-probabilities (map #(if-let [x (get f %)] x 0.000001) v)))

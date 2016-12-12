@@ -22,7 +22,7 @@
       (hold amp dur))
     0.0))
 
-(defn play-sequence
+(defn play-sequence-twice
   [dur freq s]
   (let [hash       (reduce #(+ %1 (int %2)) 0 (str s))
         [tt pp rr] (split-sequence s)
@@ -31,7 +31,7 @@
         ts         (map m tt)
         ds         (map m dd)
         pf         (pitch-freq freq pp)]
-    (println "hash\t" hash)
+    (println "id\t" hash)
     (println "dur\t" dur)
     (println "freq\t" freq)
     (println "times\t" ts)

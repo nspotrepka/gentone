@@ -21,6 +21,13 @@
     (is (= 2.2 (dist -1.1 1.1)))
     (is (= 3.0 (dist 1.5 -1.5)))))
 
+(deftest dist2-test
+  (testing "dist2"
+    (is (= 1.0 (dist2 0 1)))
+    (is (= 1.0 (dist2 1 0)))
+    (is (= 4.0 (dist2 -1 1)))
+    (is (= 9.0 (dist2 1.5 -1.5)))))
+
 (deftest pow-test
   (testing "pow"
     (is (= 0 (pow 0 1)))
@@ -72,12 +79,19 @@
     (is (= [1 1/2 1 4] (products [1/2 2 4 1/4])))
     (is (= [5 4 8 1] (products 5 [4/5 2 1/8 5])))))
 
+(deftest entropy-from-distribution-test
+  (testing "entropy-from-distribution"
+    (is (= 0.0 (entropy-from-distribution [1])))
+    (is (= 1.0 (entropy-from-distribution [1/2 1/2])))
+    (is (= 1.5 (entropy-from-distribution [1/4 1/4 1/2])))
+    (is (= 1.75 (entropy-from-distribution [1/8 1/8 1/4 1/2])))))
+
 (deftest entropy-from-probabilities-test
   (testing "entropy-from-probabilities"
     (is (= 0.0 (entropy-from-probabilities [1])))
     (is (= 1.0 (entropy-from-probabilities [1/2 1/2])))
-    (is (= 1.5 (entropy-from-probabilities [1/4 1/4 1/2])))
-    (is (= 1.75 (entropy-from-probabilities [1/8 1/8 1/4 1/2])))))
+    (is (= (double 5/3) (entropy-from-probabilities [1/4 1/4 1/2])))
+    (is (= (double 9/4) (entropy-from-probabilities [1/8 1/8 1/4 1/2])))))
 
 (deftest entropy-test
   (testing "entropy"
@@ -92,21 +106,20 @@
     (is (= (exp -2) (gaussian 1 2)))
     (is (= (exp -1/2) (gaussian 2 2)))))
 
-(deftest gaussian-scaled-entropy-test
-  (testing "gaussian-scaled-entropy"
-    (is (= 0.0 (gaussian-scaled-entropy 1 [0 0 0 0])))
-    (let [s  (+ 1 (exp -1/2))
-          p0 (/ 1 s)
-          p1 (/ (exp -1/2) s)]
+(deftest gaussian-entropy-test
+  (testing "gaussian-entropy"
+    (is (= 0.0 (gaussian-entropy 1 [0 0 0 0])))
+    (let [a [1 (exp -1/2)]
+          p (normalize a)]
       (is
         (=
-          (entropy-from-probabilities [p0 p1])
-          (gaussian-scaled-entropy 1 [0 1 0 1]))))
-    (let [s  (+ 1 (exp -1/2) (* 2 (exp -2)))
-          p0 (/ 1 s)
-          p1 (/ (exp -1/2) s)
-          p2 (/ (* 2 (exp -2)) s)]
+          (entropy-from-distribution p)
+          (gaussian-entropy 1 [0 1 0 1]))))
+    (let [a [1 (exp -1/2) (* 2 (exp -2))]
+          p (normalize a)]
       (is
         (=
-          (entropy-from-probabilities [p0 p1 p2])
-          (gaussian-scaled-entropy 1 [0 1 2 2]))))))
+          (entropy-from-distribution p)
+          (gaussian-entropy 1 [0 1 2 2]))))))
+
+;; TODO: write test for distribution-entropy
