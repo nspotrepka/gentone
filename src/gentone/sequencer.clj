@@ -137,13 +137,13 @@
               d-delta    (differences dd)
               p-delta2   (differences p-delta)
               d-delta2   (differences d-delta)
-              pp-e       (entropy pp2)
-              dd-e       (entropy dd)
-              rr-e       (entropy rr)
-              p-delta-e  (gaussian-entropy sp1 p-delta)
-              p-delta2-e (gaussian-entropy sp2 p-delta2)
-              d-delta-e  (gaussian-entropy sd1 d-delta)
-              d-delta2-e (gaussian-entropy sd2 d-delta2)]
+              pp-e       (info pp2)
+              dd-e       (info dd)
+              rr-e       (info rr)
+              p-delta-e  (gaussian-info sp1 p-delta)
+              p-delta2-e (gaussian-info sp2 p-delta2)
+              d-delta-e  (gaussian-info sd1 d-delta)
+              d-delta2-e (gaussian-info sd2 d-delta2)]
           (+
             (dist2 c (count tt))
             (dist2 r (count (filter identity rr)))
@@ -180,8 +180,8 @@
                       :num-islands root-size
                       :population-size root-size
                       :tournament-size (int (+ 1 (log2 root-size)))
-                      :mutation-probability 0.777
-                      :max-depth 16
+                      :mutation-probability 0.4
+                      :max-depth 24
                       :mutation-depth 16
                       :adf-count 0
                       :adf-arity 1}

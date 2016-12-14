@@ -79,26 +79,36 @@
     (is (= [1 1/2 1 4] (products [1/2 2 4 1/4])))
     (is (= [5 4 8 1] (products 5 [4/5 2 1/8 5])))))
 
-(deftest entropy-from-distribution-test
-  (testing "entropy-from-distribution"
-    (is (= 0.0 (entropy-from-distribution [1])))
-    (is (= 1.0 (entropy-from-distribution [1/2 1/2])))
-    (is (= 1.5 (entropy-from-distribution [1/4 1/4 1/2])))
-    (is (= 1.75 (entropy-from-distribution [1/8 1/8 1/4 1/2])))))
+(deftest info-from-distribution-test
+  (testing "info-from-distribution"
+    (is (= 0.0 (info-from-distribution [1])))
+    (is (= 1.0 (info-from-distribution [1/2 1/2])))
+    (is (= 1.5 (info-from-distribution [1/4 1/4 1/2])))
+    (is (= 1.75 (info-from-distribution [1/8 1/8 1/4 1/2])))))
 
-(deftest entropy-from-probabilities-test
-  (testing "entropy-from-probabilities"
-    (is (= 0.0 (entropy-from-probabilities [1])))
-    (is (= 1.0 (entropy-from-probabilities [1/2 1/2])))
-    (is (= (double 5/3) (entropy-from-probabilities [1/4 1/4 1/2])))
-    (is (= (double 9/4) (entropy-from-probabilities [1/8 1/8 1/4 1/2])))))
+(deftest info-from-probabilities-test
+  (testing "info-from-probabilities"
+    (is (= 0.0 (info-from-probabilities [1])))
+    (is (= 1.0 (info-from-probabilities [1/2 1/2])))
+    (is (= (double 5/3) (info-from-probabilities [1/4 1/4 1/2])))
+    (is (= 2.25 (info-from-probabilities [1/8 1/8 1/4 1/2])))))
 
-(deftest entropy-test
-  (testing "entropy"
-    (is (= 0.0 (entropy [0 0 0 0])))
-    (is (= 1.0 (entropy [0 1 0 1])))
-    (is (= 1.5 (entropy [0 1 2 2])))
-    (is (= 1.75 (entropy [0 0 1 0 0 1 2 3])))))
+(deftest info-from-distribution-scaled-test
+  (testing "info-from-distribution-scaled"
+    (is (= 1.0 (info-from-distribution-scaled [1] [0.5])))
+    (is (= 1.5 (info-from-distribution-scaled [1/2 1/2] [1 0.5])))
+    (is (= 2.75 (info-from-distribution-scaled [1/4 1/4 1/2] [1 0.5 0.25])))
+    (is
+      (=
+        2.75
+        (info-from-distribution-scaled [1/8 1/8 1/4 1/2] [1 1 1 0.25])))))
+
+(deftest info-test
+  (testing "info"
+    (is (= 0.0 (info [0 0 0 0])))
+    (is (= 1.0 (info [0 1 0 1])))
+    (is (= 1.5 (info [0 1 2 2])))
+    (is (= 1.75 (info [0 0 1 0 0 1 2 3])))))
 
 (deftest gaussian-test
   (testing "gaussian"
@@ -106,20 +116,20 @@
     (is (= (exp -2) (gaussian 1 2)))
     (is (= (exp -1/2) (gaussian 2 2)))))
 
-(deftest gaussian-entropy-test
-  (testing "gaussian-entropy"
-    (is (= 0.0 (gaussian-entropy 1 [0 0 0 0])))
-    (let [a [1 (exp -1/2)]
-          p (normalize a)]
+(deftest gaussian-info-test
+  (testing "gaussian-info"
+    (is (= 0.0 (gaussian-info 1 [0 0 0 0])))
+    (let [p [1/2 1/2]
+          q [1 (exp -1/2)]]
       (is
         (=
-          (entropy-from-distribution p)
-          (gaussian-entropy 1 [0 1 0 1]))))
-    (let [a [1 (exp -1/2) (* 2 (exp -2))]
-          p (normalize a)]
+          (info-from-distribution-scaled p q)
+          (gaussian-info 1 [0 1 0 1]))))
+    (let [p [1/4 1/4 1/2]
+          q [1 (exp -1/2) (exp -2)]]
       (is
         (=
-          (entropy-from-distribution p)
-          (gaussian-entropy 1 [0 1 2 2]))))))
+          (info-from-distribution-scaled p q)
+          (gaussian-info 1 [0 1 2 2]))))))
 
-;; TODO: write test for distribution-entropy
+;; TODO: write test for distribution-info

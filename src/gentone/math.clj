@@ -61,35 +61,40 @@
   ([v] (products 1 v))
   ([x v] (drop-last 1 (reductions * x v))))
 
-(defn entropy-from-distribution
+(defn info-from-distribution
   [p]
   (double (- (reduce + (map #(* % (log2 %)) p)))))
 
-(defn entropy-from-probabilities
+(defn info-from-probabilities
   [p]
   (let [c (count p)]
     (if (= c 0)
       0.0
       (double (/ (- (reduce + (map log2 p))) c)))))
 
-(defn entropy
+(defn info-from-distribution-scaled
+  [p q]
+  (double (- (reduce + (map #(* %1 (log2 %2)) p (map * p q))))))
+
+(defn info
   [v]
   (let [c  (count v)
         f  (frequencies v)
         p  (map #(/ % c) (vals f))]
-    (entropy-from-distribution p)))
+    (info-from-distribution p)))
 
 (defn gaussian
   [sigma x]
   (exp (/ (* x x) (* -2 sigma sigma))))
 
-(defn gaussian-entropy
+(defn gaussian-info
   [sigma v]
-  (let [f (frequencies v)
-        a (map #(* (get f %) (gaussian sigma %)) (keys f))
-        p (normalize a)]
-    (entropy-from-distribution p)))
+  (let [c (count v)
+        f (frequencies v)
+        p (map #(/ % c) (vals f))
+        q (map (partial gaussian sigma) (keys f))]
+    (info-from-distribution-scaled p q)))
 
-(defn distribution-entropy
+(defn distribution-info
   [f v]
-  (entropy-from-probabilities (map #(if-let [x (get f %)] x 0.000001) v)))
+  (info-from-probabilities (map #(if-let [x (get f %)] x 0) v)))

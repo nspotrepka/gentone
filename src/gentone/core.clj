@@ -1,5 +1,6 @@
 (ns gentone.core
   (:require [pink.simple       :refer :all]
+            [gentone.math      :refer :all]
             [gentone.sequencer :refer :all]
             [gentone.sound     :refer :all]))
 
@@ -14,7 +15,7 @@
            root-size 8 iterations 8 migrations 24
            impulse-count 8 rest-count 0
            pitches 4 p1 0 p2 0 durations 4 d1 0 d2 0
-           sigma-p1 1000 sigma-p2 1000 sigma-d1 1000 sigma-d2 1000}}]
+           sigma-p1 2 sigma-p2 4 sigma-d1 2 sigma-d2 4}}]
   (let [s (generate-sequence
             root-size
             iterations
@@ -34,12 +35,33 @@
             (stop-engine))]
     s))
 
-(defn foo
-  "An example function."
-  []
+(defn simple-rhythm
+  "Simple sequence with n impulses, calculated with m migrations."
+  [n m]
   (run-generation
     {:duration 1 :frequency 440
-     :root-size 8 :iterations 8 :migrations 24
-     :impulse-count 8 :rest-count 0
-     :pitches 4 :p1 0 :p2 0 :durations 4 :d1 0 :d2 0
-     :sigma-p1 1000 :sigma-p2 1000 :sigma-d1 1000 :sigma-d2 1000}))
+     :root-size 8 :iterations 8 :migrations m
+     :impulse-count n :rest-count 0
+     :pitches 1 :p1 0 :p2 0 :durations 1 :d1 0 :d2 0
+     :sigma-p1 2 :sigma-p2 4 :sigma-d1 2 :sigma-d2 4}))
+
+(defn exponential-rhythm
+  "Simple sequence with n impulses, calculated with m migrations."
+  [n m]
+  (run-generation
+    {:duration 1 :frequency 440
+     :root-size 8 :iterations 8 :migrations m
+     :impulse-count n :rest-count 0
+     :pitches 1 :p1 0 :p2 0 :durations (dec n) :d1 1/2 :d2 0
+     :sigma-p1 2 :sigma-p2 4 :sigma-d1 2 :sigma-d2 4}))
+
+(defn simple-tune
+  "Simple sequence with n pitches, r rests, p pitches, d durations,
+   and pitch/duration movement of 2, calculated with m migrations."
+  [n r p d m]
+  (run-generation
+    {:duration 1 :frequency 440
+     :root-size 8 :iterations 8 :migrations m
+     :impulse-count n :rest-count r
+     :pitches p :p1 2 :p2 0 :durations d :d1 2 :d2 0
+     :sigma-p1 2 :sigma-p2 4 :sigma-d1 2 :sigma-d2 4}))
