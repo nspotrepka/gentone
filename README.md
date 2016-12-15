@@ -11,7 +11,7 @@ First, make sure you have Leiningen.
 $ brew install leiningen
 ```
 
-To run an experiment, use the ```foo``` function.
+To run an experiment, use the ```simple-tune``` function.
 
 ```sh
 $ lein repl
