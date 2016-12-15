@@ -16,7 +16,7 @@ To run an experiment, use the ```foo``` function.
 ```sh
 $ lein repl
 
-user=> (foo 4 300 5 5)
+user=> (simple-tune 7 2 4 3 50)
 ```
 
 ## Testing
